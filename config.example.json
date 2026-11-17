@@ -1,0 +1,19 @@
+{
+  "root": "/path/to/your/notes",
+  "db": ".data/memory.db",
+  "sources": ["日记.md", "规则.md"],
+  "dirs": ["笔记"],
+  "ledger": "日记.md",
+  "cards": ".data/cards.jsonl",
+  "cards_source": "cards",
+  "weights": ".data/weights.json",
+  "anchors": ".data/anchors.json",
+  "stats": ".data/stats.json",
+  "alias_file": ".data/aliases.txt",
+  "emotion_index": ".data/emotions.md",
+  "law": {"prefixes": [], "files": ["规则.md"]},
+  "my_voice": [],
+  "cold": 20,
+  "decay": {"kind": {"情绪": 1.0}, "w_min": 3, "w3": 0.5, "default": 2.0},
+  "wake_gain": 20
+}
