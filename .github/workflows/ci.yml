@@ -29,3 +29,17 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: python tests/smoke.py
+        
+  privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: scan for absolute paths, emails and tokens
+        run: |
+          set -e
+          if grep -rInE --exclude-dir=.git --exclude='ci.yml' \
+            '(^|[^A-Za-z])[A-Za-z]:\\\\|/Users/[^/ ]+/|/home/[^/ ]+/|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|sk-[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}' . ; then
+            echo "::error::possible private path, email or token found"
+            exit 1
+          fi
+        
