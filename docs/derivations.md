@@ -46,40 +46,42 @@
 
 一句话：**引擎是器官，派生物是这个人的生活习惯。** 器官能移植，习惯不能。
 
----
-
 ## 5. 想自己实现：三段伪代码
 
 ### 5.1 结构化索引
 
+```
 for each page in ledger:
     day = 从 "## YYYY-MM-DD" 取日期
     for each section in page:
         heading, time, tags, text = 解析
         emit {day, heading, time, tags, chars: len(text)}
+```
 
 ### 5.2 星图
 
+```
 nodes = []
 for each card in cards: nodes.append({id, day, kind, weight})
 for each day in ledger:  nodes.append({id: "day:" + day, kind: "day"})
 edges = 同一天的卡片连日期星
         + 共享稀有词（log(N/df) 加权）
         + 卡片 evidence 跨天命中
+```
 
 阈值建议：孤点比例 > 25% 说明分词或阈值太严；跨天边占比通常 < 10%；日期星断档 > 3 天要查日收尾是不是漏了。
 
 ### 5.3 行号锚点
 
+```
 for each card with refs like "ledger.md#L1188":
     if 该行不在卡片的日期下:
         在账本里找该卡片的日期标题，取最近的一个锚点位置
         写回 refs
+```
 
 ## 6. 约定
 
 - 派生物目录写进 `.gitignore`，不进版本库。
 - 重算入口只有一个（一个命令），不要散在多个脚本里。
 - 派生物里不写任何「无法从正本重建」的信息。
-
-
