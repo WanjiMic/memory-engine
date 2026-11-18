@@ -1,5 +1,5 @@
 # memory-engine
-
+[![ci](https://github.com/WanjiMic/memory-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/WanjiMic/memory-engine/actions/workflows/ci.yml)
 文件型长期记忆的最小实现：**正本是普通 Markdown，检索走 FTS5，旧事只沉不删，捞回来时明说是捞回来的。**
 
 不依赖向量库、不依赖外部服务，四个 Python 文件，能在一台离线电脑上跑。
