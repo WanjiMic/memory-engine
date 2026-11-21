@@ -58,11 +58,11 @@
 - **正本不限于「记忆」**。任何 `.md` / `.txt` 都能配进 `sources` / `dirs`，demo 里就混了日记、工作规则、面试笔记。
 - **索引只有一份**。`记忆索引.txt` 这类「给人 grep 的速查表」在开源包里没有——引擎用 SQLite 的 FTS5，再维护一份文本索引是重复。人的阅读入口就是正本和检索输出。
 
-Windows 用户：先设 set PYTHONIOENCODING=utf-8（PowerShell：$env:PYTHONIOENCODING="utf-8"），否则测试里的中文断言会乱码失败。
 ## 快速开始
 
 要求：Python ≥ 3.9，SQLite ≥ 3.34（需要内置 FTS5 的 trigram 分词器）。
 
+Windows 用户先设 `set PYTHONIOENCODING=utf-8`（PowerShell：`$env:PYTHONIOENCODING="utf-8"`），否则测试里的中文断言会因乱码失败。
 ```bash
 python -c "import sqlite3; print(sqlite3.sqlite_version)"
 ```
@@ -149,8 +149,9 @@ schema.sql            库结构
 - 不理解语义；换个说法但近义表里没有，就找不到。
 - 单机、单写入者；并发写同一个库不做保护。
 - 衰减公式是手调的，不是拟合出来的。
-依赖 SQLite ≥ 3.34（FTS5 的 trigram 分词器）。系统自带的老 SQLite 会报 no such tokenizer: trigram——这不是配置问题，是库太老，换 Python（自带新版 SQLite）即可。
-只在带 UTF-8 的终端里测过。Windows 控制台默认 GBK，中文输出会乱码、测试断言会失败；用 PYTHONIOENCODING=utf-8。正本本身必须是 UTF-8
+- **SQLite 版本**：需要 ≥ 3.34（FTS5 的 trigram 分词器）。系统自带的老 SQLite 会报 `no such tokenizer: trigram`——这不是配置问题，是库太老，换 Python（自带新版 SQLite）即可。
+- **编码**：只在带 UTF-8 的终端里测过。Windows 控制台默认 GBK，中文输出会乱码、测试断言会失败；用 `PYTHONIOENCODING=utf-8`。正本本身必须是 UTF-8。
+
 ## License
 
 MIT。见 `LICENSE`。
