@@ -31,6 +31,22 @@ def run(*args):
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 
 
+def check_mmr(check):
+    """去冗余是纯函数，不用起子进程：直接喂几条假候选。"""
+    if ROOT not in sys.path:
+        sys.path.insert(0, ROOT)
+    from engine import diversify as dv
+
+    items = [
+        {"score": 10.0, "text": "今天把检索的排序改好了，MMR 那一步也接上了，测试也过了。", "day": "20261120"},
+        {"score": 9.7, "text": "今天把检索的排序改好了，MMR 那一步也接上了，测试过了。", "day": "20261120"},
+        {"score": 9.4, "text": "晚饭煮了面，盐放多了，喝了两杯水。", "day": "20261120"},
+    ]
+    check("去冗余：λ=1 不干预", dv.order(items, 3, lam=1.0) == [0, 1, 2])
+    check("去冗余：压掉同日近义句", dv.order(items, 3, lam=0.7) == [0, 2, 1])
+    check("去冗余：日期从卡片标题取", dv.day_of("e20261120-3") == "20261120" and dv.day_of("日记") == "")
+
+
 def main():
     # 建在仓库里当临时工作区；不用 tempfile.mkdtemp——它在 Windows 沙箱里
     # 建出来的目录连创建者自己都写不进（WinError 5）。
@@ -112,6 +128,8 @@ def main():
         os.utime(src, (future, future))
         rc, out = run("-m", "engine.search", "--config", cfg, "解析器")
         check("检索：旧库自动重建", rc == 0 and "已先按正本重建" in out, out)
+
+        check_mmr(check)
 
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
