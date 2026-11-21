@@ -28,6 +28,7 @@ import sqlite3
 import sys
 
 from . import config as _config
+from . import diversify as _div
 from . import weight as _weight
 
 # 加权（只影响排序）
@@ -226,6 +227,34 @@ def _qterm(s):
     return '"' + s.replace('"', " ") + '"'
 
 
+def _div_rows(rows, limit, cfg, scores=None):
+    """按 MMR 从候选池里挑前 limit 条。
+
+    rows 的列约定：(source, heading, snippet, text[, rank])。
+    没有 rank 的（短词 LIKE 那一路）由调用方给 scores。
+    λ=1.0 或池子本来就不大时，原样返回——不为了"去重"去动顺序。
+    """
+    if len(rows) <= limit:
+        return [r[:4] for r in rows]
+    lam = float(getattr(cfg, "mmr_lambda", 1.0) or 1.0)
+    if lam >= 1.0:
+        return [r[:4] for r in rows[:limit]]
+    items = []
+    for i, r in enumerate(rows):
+        if scores is not None:
+            sc = scores[i]
+        else:
+            sc = -float(r[4] or 0.0)
+        items.append({
+            "score": sc,
+            "text": r[3] or "",
+            "day": _div.day_of(r[1]),
+        })
+    picks = _div.order(items, limit, lam, float(getattr(cfg, "mmr_same_day", 0.35)),
+                      float(getattr(cfg, "mmr_dup", 0.75)))
+    return [rows[i][:4] for i in picks]
+
+
 def _query_long(con, cfg, long_terms, short_terms, limit):
     law_cond, law_params = _law_where(cfg, "c.")
     voice_cond, voice_params = _voice_where(cfg, "c.")
@@ -237,12 +266,12 @@ def _query_long(con, cfg, long_terms, short_terms, limit):
     def run(match_q, cold):
         sql = (
             "select c.source, c.heading, "
-            "snippet(chunks_fts, 0, '[', ']', '…', 14), c.text "
+            "snippet(chunks_fts, 0, '[', ']', '…', 14), c.text, rank "
             "from chunks_fts join chunks c on c.id = chunks_fts.rowid "
             "where chunks_fts match ? " + cold + " "
             "order by rank * " + boost + " * " + w_boost + " limit ?"
         )
-        params = (match_q,) + tuple(law_params) + (LAW_BOOST,) + tuple(voice_params) + (BOOST, limit * 4)
+        params = (match_q,) + tuple(law_params) + (LAW_BOOST,) + tuple(voice_params) + (BOOST, limit * 6)
         return con.execute(sql, params).fetchall()
 
     cold_hit = False
@@ -260,7 +289,7 @@ def _query_long(con, cfg, long_terms, short_terms, limit):
                 cold_hit = bool(rows)
     if short_terms:
         rows = [r for r in rows if all(s in r[3] for s in short_terms)]
-    return rows[:limit], cold_hit, used_alias
+    return _div_rows(rows, limit, cfg), cold_hit, used_alias
 
 
 def _query_short(con, cfg, terms, limit):
@@ -288,7 +317,8 @@ def _query_short(con, cfg, terms, limit):
     if not rows:
         rows = run("")
         cold_hit = bool(rows)
-    return rows, cold_hit, []
+    _scores = [float(len(rows) - _i) for _i in range(len(rows))]
+    return _div_rows(rows, limit, cfg, scores=_scores), cold_hit, []
 
 
 def _print_cold(rows, cfg):

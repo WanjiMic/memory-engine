@@ -57,6 +57,10 @@ class Config(object):
         self.decay.update({k: v for k, v in user_decay.items() if k != "kind"})
         self.decay["kind"] = dict(user_decay.get("kind") or {})
         self.wake_gain = int(data.get("wake_gain", 20))
+        # MMR 去冗余（0.2.0 起）：λ=1.0 等于关掉，回到纯相关度排序
+        self.mmr_lambda = float(data.get("mmr_lambda", 0.70))
+        self.mmr_same_day = float(data.get("mmr_same_day", 0.35))
+        self.mmr_dup = float(data.get("mmr_dup", 0.75))
 
         cl = data.get("cold_log")
         self.cold_log = self._path(cl) if cl else None
