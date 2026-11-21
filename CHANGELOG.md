@@ -3,9 +3,10 @@
 ## 未发布
 
 - **文档**：新增 `docs/derivations.md`——派生物（结构化索引、星图、行号锚点、冷检索库）是什么、何时重算、为什么不属于引擎。
+- **文档**：`docs/derivations.md` 失败表补「派生物几天没变，没人发现」，并加 §3.1——怎么判断它是停了还是没变（比 `builtAt` 与上游正本 mtime；重算脚本必须非 0 退出并报错，不写死解释器与工具路径）。
 - **README**：新增「维护模式」：0.1.x 只修 bug；不承诺路线图；可 fork 自留。
+- **README**：已知限制补两条——SQLite 需 ≥ 3.34（否则 `no such tokenizer: trigram`）、Windows 编码要用 `PYTHONIOENCODING=utf-8`；快速开始加一行环境提示。这两条是 Windows 用户第一次跑测试就会踩的坑。
 - **CI**：新增 `privacy` job，扫描绝对路径、邮箱与常见令牌字样。
-
 ## 0.1.0 — 2026-11-17
 
 首个公开版本。
