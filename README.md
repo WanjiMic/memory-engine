@@ -58,9 +58,49 @@
 - **正本不限于「记忆」**。任何 `.md` / `.txt` 都能配进 `sources` / `dirs`，demo 里就混了日记、工作规则、面试笔记。
 - **索引只有一份**。`记忆索引.txt` 这类「给人 grep 的速查表」在开源包里没有——引擎用 SQLite 的 FTS5，再维护一份文本索引是重复。人的阅读入口就是正本和检索输出。
 
+## 装上，用它读你自己的文件
+
+不需要 `pip install` 任何东西——只用 Python 标准库（`sqlite3` 就够），有 Python ≥ 3.9 就能跑。
+
+```bash
+git clone https://github.com/WanjiMic/memory-engine.git
+cd memory-engine
+```
+
+不用 git 的话：仓库页右上 `Code` → `Download ZIP`，解压进目录。
+
+然后拿你自己的笔记试——把示例配置复制一份：
+
+```bash
+cp config.example.json config.json
+```
+
+打开 `config.json`，只改这一处：`dirs` 里填你自己的目录，**其余键保持原样**（`root`、`db` 等都有默认值）。
+
+```json
+{
+  "dirs": ["D:/我的笔记"]
+}
+```
+
+（`dirs` 下的 `.md` / `.txt` 会被递归收进来；也可以只用 `sources` 精确点名几个文件。
+**Windows 路径用正斜杠 `/`**，写成 `D:/我的笔记`，不要写单个反斜杠——那是转义符。）
+
+```bash
+python -m engine.import_memories --config config.json   # 1. 建索引
+python -m engine.search --config config.json "你记得的词"  # 2. 检索
+```
+
+想先看效果、不动自己的文件，就跑 demo（语料已经带在仓库里）：
+
+```bash
+python -m engine.import_memories --config demo/config.json
+python -m engine.search --config demo/config.json "解析器"
+```
+
 ## 快速开始
 
-要求：Python ≥ 3.9，SQLite ≥ 3.34（需要内置 FTS5 的 trigram 分词器）。
+不需要 `pip install`——零第三方依赖。要求：Python ≥ 3.9，SQLite ≥ 3.34（需要内置 FTS5 的 trigram 分词器）。
 
 Windows 用户先设 `set PYTHONIOENCODING=utf-8`（PowerShell：`$env:PYTHONIOENCODING="utf-8"`），否则测试里的中文断言会因乱码失败。
 ```bash
